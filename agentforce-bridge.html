@@ -16,14 +16,16 @@
     var url = msg.instanceUrl + msg.path;
 
     try {
-      var resp = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + msg.token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(msg.body)
-      });
+      var method = msg.method || 'POST';
+      var fetchOptions = {
+        method: method,
+        headers: { 'Authorization': 'Bearer ' + msg.token }
+      };
+      if (method !== 'GET' && method !== 'HEAD' && msg.body != null) {
+        fetchOptions.headers['Content-Type'] = 'application/json';
+        fetchOptions.body = JSON.stringify(msg.body);
+      }
+      var resp = await fetch(url, fetchOptions);
 
       if (!resp.ok) {
         var txt = await resp.text().catch(function() { return String(resp.status); });
